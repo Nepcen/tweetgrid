@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Tweet Grid</title>
+        <link rel="icon" type="image/x-icon" href="./logo.ico" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&display=swap"
+            rel="stylesheet"
+        />
+        <style>
+            body {
+                font-family: "Comfortaa", sans-serif;
+                font-optical-sizing: auto;
+                font-style: normal;
+                margin: 20px;
+                background-color: #f5f8fa;
+            }
+            .grid-container {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 20px;
+                padding: 20px;
+                margin: 0 auto;
+            }
+            .grid-item {
+                background: white;
+                border-radius: 10px;
+                overflow: hidden;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            }
+            .twitter-iframe {
+                width: 100%;
+                height: 600px;
+                border: none;
+            }
+            .input-container {
+                text-align: center;
+                margin-bottom: 30px;
+                padding: 20px;
+                background: white;
+                border-radius: 10px;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                max-width: 800px;
+                margin: 20px auto;
+            }
+            .input-container input {
+                padding: 10px;
+                width: 60%;
+                margin-right: 10px;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+            }
+            .input-container button {
+                padding: 10px 20px;
+                background-color: #1da1f2;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+            .input-container button:hover {
+                background-color: #1991db;
+            }
+            .input-note {
+                font-size: 12px;
+                color: #666;
+                margin-top: 8px;
+                font-style: italic;
+            }
+            .generated-link {
+                margin-top: 15px;
+                padding: 10px;
+                background-color: #f8f9fa;
+                border-radius: 5px;
+                display: none;
+            }
+            .generated-link a {
+                color: #1da1f2;
+                text-decoration: none;
+                word-break: break-all;
+            }
+            .made-by {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background-color: white;
+                padding: 8px 15px;
+                border-radius: 20px;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                font-size: 14px;
+                text-decoration: none;
+                color: #000;
+            }
+            .made-by span {
+                font-weight: 700;
+            }
+            .made-by:hover {
+                opacity: 0.7;
+            }
+        </style>
+    </head>
+    <body>
+        <a href="https://github.com/Nepcen" class="made-by">
+            Made by <span target="_blank">Nepcen</span>
+        </a>
+
+        <div class="input-container">
+            <input
+                type="text"
+                id="accountInput"
+                placeholder="Twitter hesaplarını virgülle ayırarak girin (örn: bpthaber,anadoluajansi,trthaber)"
+            />
+            <button onclick="generateLink()">Oluştur</button>
+            <div class="input-note">
+                Not: Birden fazla hesap eklemek için hesap isimlerini virgülle
+                ayırın (örn: hesap1,hesap2,hesap3)
+            </div>
+            <div id="generatedLink" class="generated-link"></div>
+        </div>
+
+        <div id="gridContainer" class="grid-container"></div>
+
+        <script>
+            function getAccountsFromURL() {
+                const urlParams = new URLSearchParams(window.location.search)
+                const accounts = urlParams.get("accs")
+                return accounts ? accounts.split(",") : []
+            }
+
+            function createTwitterGrid() {
+                const container = document.getElementById("gridContainer")
+                const accounts = getAccountsFromURL()
+
+                if (accounts.length > 0) {
+                    document.getElementById("accountInput").value =
+                        accounts.join(",")
+                }
+
+                accounts.forEach((account) => {
+                    const gridItem = document.createElement("div")
+                    gridItem.className = "grid-item"
+
+                    const iframe = document.createElement("iframe")
+                    iframe.className = "twitter-iframe"
+                    iframe.src = `https://syndication.twitter.com/srv/timeline-profile/screen-name/${account.trim()}`
+
+                    gridItem.appendChild(iframe)
+                    container.appendChild(gridItem)
+                })
+            }
+
+            function generateLink() {
+                const accounts = document.getElementById("accountInput").value
+                if (!accounts.trim()) {
+                    alert("Lütfen en az bir Twitter hesabı girin!")
+                    return
+                }
+
+                const baseUrl = window.location.href.split("?")[0]
+                const newUrl = `${baseUrl}?accs=${encodeURIComponent(accounts)}`
+
+                const linkContainer = document.getElementById("generatedLink")
+                linkContainer.style.display = "block"
+                linkContainer.innerHTML = `<p>Oluşturulan link:</p><a href="${newUrl}">${newUrl}</a>`
+
+                // Sayfayı yenile
+                window.location.href = newUrl
+            }
+
+            // Sayfa yüklendiğinde grid'i oluştur
+            window.addEventListener("load", createTwitterGrid)
+        </script>
+    </body>
+</html>
